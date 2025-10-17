@@ -47,8 +47,24 @@ def db_scan(img,k):
 
     print(test_cluster)
 
-    for pixel in range(len(test_attractor)):
-        img[test_attractor[pixel][0]][test_attractor[pixel][1]] = img[test_cluster[pixel][0]][test_cluster[pixel][1]]
+    for y in range(int(len(img))):
+        for x in range(int(len(img[y]))):
+            best_att = 10000000
+            best_att_ind = -1
+            for att in range(len(test_attractor)):
+                color = img[test_attractor[att][1]][test_attractor[att][0]]
+                col_dist_cubed = (color[0]**3)+(color[1]**3)+(color[2]**3)
+                if best_att > col_dist_cubed:
+                    best_att = col_dist_cubed
+                    best_att_ind = att
+            test_cluster[best_att_ind].append([x,y])
+
+    for att in range(len(test_attractor)):
+        color = tuple(img[test_attractor[att][1]][test_attractor[att][0]])
+        for pixel in range(len(test_cluster)):
+            img[test_cluster[att][pixel][1]][test_cluster[att][pixel][0]] = color
+    cv2.imshow("nerd",img)
+    cv2.waitKey(10000)
 
 def cluster(img, cur_cluster, cur_pixel)-> list:
     global radius

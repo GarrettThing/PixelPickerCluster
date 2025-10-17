@@ -1,11 +1,14 @@
+from imghdr import tests
+
 import cv2
 import numpy as np
+import sys
 
-radius = 2
+radius = 1
 def main():
     image=cv2.imread("/Users/garrettclark/PycharmProjects/PixelPickerCluster/Pixel Picker Cluster/Yes.png")
     window = np.zeros(image.shape,dtype=image.dtype)
-    cv2.imshow("nerd",image)
+    cv2.imshow("hi",image)
     cv2.waitKey(1000)
     k_att = 5
 
@@ -13,23 +16,24 @@ def main():
     #     print("next row of pixels: ")
     #     for x in y:
     #         print(str(x))
-
     db_scan(image,k_att)
 
 def db_scan(img,k):
 
-
+    test_attractor = []
     test_cluster = []
 
 
-    for y in range(len(img)):
-        for x in range(len(img)):
-            print("HEY " + str(x) + str(y))
-            cur_cluster = cluster(img,[],[x,y])
+    for y in range(int(len(img)/10)):
+        for x in range(int(len(img[y])/10)):
+
+            cur_cluster = cluster(img,[],[x*10,y*10])
 
             if cur_cluster[0] not in test_cluster:
+                test_attractor.append([x,y])
                 test_cluster.append(cur_cluster)
 
+    print('doh')
     while len(test_cluster) > k:
         remove_ind = -1
         smallest = 10000000
@@ -38,9 +42,13 @@ def db_scan(img,k):
             if cur_len < smallest:
                 smallest = cur_len
                 remove_ind = cur
+        test_attractor.pop(remove_ind)
         test_cluster.pop(remove_ind)
 
     print(test_cluster)
+
+    for pixel in range(len(test_attractor)):
+        img[test_attractor[pixel][0]][test_attractor[pixel][1]] = img[test_cluster[pixel][0]][test_cluster[pixel][1]]
 
 def cluster(img, cur_cluster, cur_pixel)-> list:
     global radius

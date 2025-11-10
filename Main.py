@@ -6,7 +6,7 @@ import sys
 
 radius = 1
 def main():
-    image=cv2.imread("/Users/garrettclark/PycharmProjects/PixelPickerCluster/Pixel Picker Cluster/Yes.png")
+    image=cv2.imread("Yes.png")
     window = np.zeros(image.shape,dtype=image.dtype)
     cv2.imshow("hi",image)
     cv2.waitKey(1000)
@@ -33,10 +33,10 @@ def db_scan(img,k):
                 test_attractor.append([x,y])
                 test_cluster.append(cur_cluster)
 
-    print('doh')
+
     while len(test_cluster) > k:
         remove_ind = -1
-        smallest = 10000000
+        smallest = -1
         for cur in range(len(test_cluster)):
             cur_len = len(test_cluster[cur])
             if cur_len < smallest:
@@ -53,16 +53,30 @@ def db_scan(img,k):
             best_att_ind = -1
             for att in range(len(test_attractor)):
                 color = img[test_attractor[att][1]][test_attractor[att][0]]
-                col_dist_cubed = (color[0]**3)+(color[1]**3)+(color[2]**3)
-                if best_att > col_dist_cubed:
-                    best_att = col_dist_cubed
+                col_dist_square = (((color[0]-img[y,x][0])**2)+
+                                   ((color[1]-img[y,x][1])**2)+
+                                   ((color[2]-img[y,x][0])**2))
+                if best_att > col_dist_square:
+                    best_att = col_dist_square
                     best_att_ind = att
-            test_cluster[best_att_ind].append([x,y])
+            test_cluster[best_att_ind].append([y,x])
+
+    for clusters in range(len(test_cluster)):
+        avg_color = [0,0,0]
+        num_color = 0
+        for color in range(len(test_cluster[clusters])):
+            avg_color += test_cluster[clusters][color]
+            num_color += 1
+        avg_color[0] /= num_color
+        avg_color[1] /= num_color
+        avg_color[2] /= num_color
+        test_attractor[clusters] = avg_color
+
 
     for att in range(len(test_attractor)):
-        color = tuple(img[test_attractor[att][1]][test_attractor[att][0]])
+        color = tuple(img[test_attractor[att]])
         for pixel in range(len(test_cluster)):
-            img[test_cluster[att][pixel][1]][test_cluster[att][pixel][0]] = color
+            img[test_cluster[att][pixel]] = color
     cv2.imshow("nerd",img)
     cv2.waitKey(10000)
 
